@@ -1,0 +1,106 @@
+Comandos
+
+npx playwright test
+npx playwright test (nombre del test especifico)
+pluses = --headed(sirve para ejecutar el test en modo navegador)
+        --project=chromium (sirve para ejecutar el test en modo navegador chromium especifico)
+        --headed --project=chromium (conjunto)
+        --debug (modo debug)
+
+npx playwright show-report
+
+Localizar elementos
+---
+property
+css 
+xpath
+Se accede mediante el siguiente comando:
+links
+        await page.locator('').accion() o
+        await page.click('locator') (mas corta y usada)
+inputs box
+        await page.locator('locator').fill/value('valor')
+        await page.fill/value("input[id='loginpassword']", 'test@123') (primer parametro locator css/xpath/id, segundo rellenar)
+lo más recomendable es usar Relative XPath (Rel XPath) en lugar de Index XPath,
+
+Localizar multiples elementos
+----------
+        const elements = await page.$$(locator) (el locator tiene que ser el que matchea a multiples elementos) y se debe guardar en una variable
+
+Localizadores:
+page.getByRole() para localizar por atributos de accesibilidad explícitos e implícitos.
+page.getByText() para localizar por contenido de texto.
+page.getByLabel() para localizar un control de formulario por el texto del label asociado.
+page.getByPlaceholder() para localizar una entrada por su placeholder.
+page.getByAltText() para localizar un elemento, generalmente una imagen, por su texto alternativo.
+page.getByTitle() para localizar un elemento por su atributo title.
+page.getByTestId() para localizar un elemento basado en su atributo data-testid (otros atributos pueden ser configurados).
+
+Record and Play Scripts
+------------------------
+Se pueden ejecutar mediante el siguiente codigo:
+npx playwright codegen --output tests/nombredeltest.spec.js y puede tener algunas acompañantes mediante el codigo:
+npx playwright codegen --help  (output por ejemplo es el nombre del archivo que va a tener el codigo generado)
+ejemplo --device nombredeldispositivo, --browser navegador, --target lenguaje.. --viewport-size "1200,720" etc
+
+Tambien sre puede usar el pick locator para ubicar locators de algun elemento
+
+
+Assertions
+----------
+https://playwright.dev/docs/test-assertions
+
+Algunos:
+expect(page).toHaveURL()                        page has url
+expect(page).toHaveTitle()                      page has Title
+expect(page).toHaveText()                       element matches text
+expect(page).toContainText()                   element contains text
+expect(page).toHaveAttribute()                  element has attribute
+expect(page).toHaveValue(valor)                 element has class
+expect(page).toBeVisible()                      element is visible
+expect(page).toBeEnabled()                      control is enabled
+expect(page).toBeDisabled()                     element is disabled
+expect(page).toBeChecked()                      radio/checkbox is checked
+expect(page).toHaveCount()                      list of elements has given lenght
+
+Configs
+------------------
+el archivo es playwright.configs.ts 
+por ejemplo:
+import { PlaywrightTestConfig } from "@playwright/test";
+
+const config: PlaywrightTestConfig = {
+    testMatch: ["test/nombredeltest.test.ts"], // Solo ejecutará los tests dentro del archivo test/nombredeltest.test.ts
+
+    use: {
+        headless: false, // Ejecuta el navegador en modo visible (no headless)
+        viewport: { width: 1920, height: 1080 }, // Define el tamaño de la ventana del navegador
+        slowMo: 50, // Ralentiza la ejecución del test en milisegundos (útil para depuración)
+        browserName: "chromium", // Define el navegador a utilizar (puedes cambiarlo a 'firefox' o 'webkit')
+        // browserName: "firefox",
+        // browserName: "webkit",
+        screenshot: "only-on-failure", // Toma una captura de pantalla solo si la prueba falla
+        video: "retain-on-failure" // Guarda una grabación de video solo si la prueba falla
+
+    },
+    retries: 0, // Número de veces que se repetirá la prueba en caso de fallar
+    reporter: [
+        ["dot"], // Reporter de salida minimalista (muestra puntos en la terminal)
+        ["json", { outputFile: "jsonReports/jsonReport.json" }], // Genera un reporte en formato JSON en la carpeta jsonReports
+        ["html", { open: "never" }] // Genera un reporte HTML pero no lo abre automáticamente
+    ]
+};
+
+export default config;
+
+El bloque reporter en playwright.config.ts define cómo se generarán los reportes de los tests ejecutados en Playwright.
+Permite visualizar los resultados de las pruebas en distintos formatos, como consola, archivos JSON, HTML, o integraciones con herramientas de CI/CD.
+
+Tipos de reportes en Playwright:
+dot: Reporte minimalista en la terminal con puntos (.) y letras (F para fallos, S para tests omitidos, etc.).
+json: Guarda los resultados en un archivo JSON, útil para análisis automatizados o integraciones con dashboards.
+html: Genera un reporte visual en HTML con detalles de cada test, incluyendo capturas de pantalla y duración.
+list: Muestra los tests en formato lista, detallando cada ejecución.
+line: Similar a dot, pero con más información en una sola línea.
+junit: Genera un XML compatible con herramientas de CI/CD como Jenkins.
+allure-playwright: Integra Playwright con Allure para reportes avanzados e interactividad.
